@@ -1,22 +1,22 @@
 package me.miran.bedrockcracker.util;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 public class WorldHelper {
 
     public static Dimension getDimension() {
-        if (MinecraftClient.getInstance().world == null) return null;
+        if (Minecraft.getInstance().level == null) return null;
 
-        String dimensionID = MinecraftClient.getInstance().world.getRegistryKey().getValue().toString();
+        String dimensionID = Minecraft.getInstance().level.dimension().toString();
 
         switch (dimensionID){
-            case "minecraft:overworld" -> {
+            case "ResourceKey[minecraft:dimension / minecraft:overworld]" -> {
                 return Dimension.OVERWORLD;
             }
-            case "minecraft:the_nether" -> {
+            case "ResourceKey[minecraft:dimension / minecraft:the_nether]" -> {
                 return Dimension.NETHER;
             }
-            case "minecraft:the_end" -> {
+            case "ResourceKey[minecraft:dimension / minecraft:the_end]" -> {
                 return Dimension.END;
             }
             default -> {

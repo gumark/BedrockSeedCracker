@@ -4,8 +4,8 @@ import me.miran.bedrockcracker.util.BedrockCollector;
 import me.miran.bedrockcracker.cracker.util.BedrockType;
 import me.miran.bedrockcracker.cracker.util.CheckedRandom;
 import me.miran.bedrockcracker.cracker.util.Helper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 
 import java.util.*;
 
@@ -105,8 +105,8 @@ abstract class AbstractNetherCracker {
 
             int lowerThan = Helper.getDesiredIntFromYHeight(y);
 
-            tests.add(new Test(MathHelper.hashCode(x, y, z), x, y, z, lowerThan, getBounds(y)[0], getBounds(y)[1],
-                    MathHelper.hashCode(x, y, z) ^ MULTIPLY, MASK - getBounds(y)[1], MASK - getBounds(y)[1] + getBounds(y)[0]));
+            tests.add(new Test(Mth.getSeed(x, y, z), x, y, z, lowerThan, getBounds(y)[0], getBounds(y)[1],
+                    Mth.getSeed(x, y, z) ^ MULTIPLY, MASK - getBounds(y)[1], MASK - getBounds(y)[1] + getBounds(y)[0]));
         }
 
         return tests;

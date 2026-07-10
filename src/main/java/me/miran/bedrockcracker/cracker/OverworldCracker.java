@@ -2,11 +2,11 @@ package me.miran.bedrockcracker.cracker;
 
 import me.miran.bedrockcracker.util.BedrockCollector;
 import me.miran.bedrockcracker.cracker.util.BedrockType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.math.random.RandomSplitter;
-import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.levelgen.XoroshiroRandomSource;
 
 import java.util.List;
 
@@ -23,18 +23,18 @@ public class OverworldCracker {
         for (long i = 0; i < (1<<16); i++) {
             long seed = i<<48 | structureSeed;
 
-            Xoroshiro128PlusPlusRandom xoroshiro128PlusPlusRandom = new Xoroshiro128PlusPlusRandom(seed);
-            RandomSplitter splitter = xoroshiro128PlusPlusRandom.nextSplitter();
+            XoroshiroRandomSource xoroshiro128PlusPlusRandom = new XoroshiroRandomSource(seed);
+            PositionalRandomFactory splitter = xoroshiro128PlusPlusRandom.forkPositional();
 
-            RandomSplitter bedrockSplitter = splitter.split(bedrockType.name).nextSplitter();
+            PositionalRandomFactory bedrockSplitter = splitter.fromHashOf(bedrockType.name).forkPositional();
 
             for (BlockPos pos : list) {
                 int x = pos.getX();
                 int y = pos.getY();
                 int z = pos.getZ();
 
-                double d = MathHelper.map(y, bedrockType.startY, bedrockType.endY, 1.0, 0.0);
-                Random random = bedrockSplitter.split(x, y, z);
+                double d = Mth.map(y, bedrockType.startY, bedrockType.endY, 1.0, 0.0);
+                RandomSource random = bedrockSplitter.at(x, y, z);
 
                 if (((double)random.nextFloat()) >= d) continue seedLoop;
             }

@@ -1,7 +1,6 @@
 package me.miran.bedrockcracker.cracker.util;
 
-import net.minecraft.util.math.MathHelper;
-
+import net.minecraft.util.Mth;
 
 /**
  * copy of Minecrafts CheckedRandom class (which is just the default javas Random class with some thread safety features I removed).
@@ -51,7 +50,7 @@ public class CheckedRandom {
         }
 
         public CheckedRandom split(int x, int y, int z) {
-            long l = MathHelper.hashCode(x, y, z);
+            long l = Mth.getSeed(x, y, z);
             long m = l ^ this.seed;
             return new CheckedRandom(m);
         }

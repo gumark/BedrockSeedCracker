@@ -1,7 +1,7 @@
 package me.miran.bedrockcracker.cracker.util;
 
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,10 +38,10 @@ public class Helper {
         BedrockType bedrockType = BedrockType.getFromY(y);
 
         if (bedrockType.invert) {
-            return (int) ((1- MathHelper.map(y,bedrockType.endY-1,bedrockType.startY-1,1,0))*(1<<24));
+            return (int) ((1- Mth.map(y,bedrockType.endY-1,bedrockType.startY-1,1,0))*(1<<24));
         }
 
-        return (int) (MathHelper.map(y,bedrockType.startY,bedrockType.endY,1,0)*(1<<24));
+        return (int) (Mth.map(y,bedrockType.startY,bedrockType.endY,1,0)*(1<<24));
     }
 
 

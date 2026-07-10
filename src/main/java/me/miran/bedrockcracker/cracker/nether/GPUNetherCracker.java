@@ -3,10 +3,10 @@ package me.miran.bedrockcracker.cracker.nether;
 import me.miran.bedrockcracker.cracker.util.jocl.Buffer;
 import me.miran.bedrockcracker.cracker.util.jocl.IntBuffer;
 import me.miran.bedrockcracker.cracker.util.jocl.LongBuffer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.NotNull;
 import org.jocl.*;
 
@@ -48,13 +48,13 @@ class GPUNetherCracker extends AbstractNetherCracker implements AutoCloseable {
     }
 
     private static String readCrackerSource() throws IOException {
-        ResourceManager resourceManager = MinecraftClient.getInstance().getResourceManager();
-        Identifier sourceId = Identifier.of("bedrockcracker", "cracking.cl");
+        ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+        Identifier sourceId = Identifier.fromNamespaceAndPath("bedrockcracker", "cracking.cl");
 
         Resource resource = resourceManager.getResourceOrThrow(sourceId);
 
         StringBuilder source = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.open()))) {
             String line;
 
             while ((line = reader.readLine()) != null) {

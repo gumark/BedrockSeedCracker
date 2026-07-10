@@ -13,8 +13,8 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -64,15 +64,17 @@ public class BedrockCracker implements ModInitializer {
 
 
     public static void sendChatMessage(String message) {
-        sendChatMessage(Text.of(message));
+        sendChatMessage(Component.nullToEmpty(message));
     }
 
-    public static void sendChatMessage(Text message) {
-        if (MinecraftClient.getInstance().player == null) return;
+    public static void sendChatMessage(Component message) {
+        if (Minecraft.getInstance().player == null) return;
 
         if (!settings.logProgress) return;
 
-        MinecraftClient.getInstance().player.sendMessage(Text.literal(CHAT_PREFIX).append(message));
+        Minecraft.getInstance().execute(() -> {
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(CHAT_PREFIX).append(message));
+        });
     }
 
     public static void crackWorldSeed() {

@@ -1,9 +1,9 @@
 package me.miran.bedrockcracker.util;
 
 import me.miran.bedrockcracker.BedrockCracker;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +20,7 @@ public class BedrockCollector {
     private static boolean netherBedrockCollected = false;
     private static boolean overworldBedrockCollected = false;
 
-    public static void collectBedrock(WorldChunk chunk) {
+    public static void collectBedrock(LevelChunk chunk) {
         WorldHelper.Dimension dimension = WorldHelper.getDimension();
 
         if (dimension == null || dimension == WorldHelper.Dimension.END) return;
@@ -30,7 +30,7 @@ public class BedrockCollector {
             if (netherBedrockFloor.size() < NETHER_BEDROCK_SIZE) {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        BlockPos pos = chunk.getPos().getBlockPos(x, 4, z);
+                        BlockPos pos = chunk.getPos().getBlockAt(x, 4, z);
                         if (chunk.getBlockState(pos).getBlock() == Blocks.BEDROCK) {
                             netherBedrockFloor.add(pos);
                         }
@@ -41,7 +41,7 @@ public class BedrockCollector {
             if (netherBedrockRoof.size() < NETHER_BEDROCK_SIZE) {
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        BlockPos pos = chunk.getPos().getBlockPos(x, 123, z);
+                        BlockPos pos = chunk.getPos().getBlockAt(x, 123, z);
                         if (chunk.getBlockState(pos).getBlock() == Blocks.BEDROCK) {
                             netherBedrockRoof.add(pos);
                         }
@@ -67,7 +67,7 @@ public class BedrockCollector {
 
             for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
-                        BlockPos pos = chunk.getPos().getBlockPos(x, -60, z);
+                        BlockPos pos = chunk.getPos().getBlockAt(x, -60, z);
 
                         if (chunk.getBlockState(pos).getBlock() == Blocks.BEDROCK) {
                             overworldBedrock.add(pos);

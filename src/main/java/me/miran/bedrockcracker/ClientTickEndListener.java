@@ -3,8 +3,8 @@ package me.miran.bedrockcracker;
 import me.miran.bedrockcracker.api.settings.CrackStartType;
 import me.miran.bedrockcracker.util.BedrockCollector;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 
 
 /**
@@ -16,8 +16,8 @@ public class ClientTickEndListener implements ClientTickEvents.EndTick {
     private boolean cracked = false;
 
     @Override
-    public void onEndTick(MinecraftClient client) {
-        World world = client.world;
+    public void onEndTick(Minecraft client) {
+        Level world = client.level;
 
         // if we are not in a world, and we were before -> clear the cache
         if (world == null) {
