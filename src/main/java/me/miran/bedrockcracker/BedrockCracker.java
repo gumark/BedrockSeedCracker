@@ -16,6 +16,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +26,8 @@ public class BedrockCracker implements ModInitializer {
 
 
     private static final String CHAT_PREFIX = "§8[§5§oBedrockCracker§8]§r ";
+
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private static final List<BedrockCrackerController> controllers = new ArrayList<>();
 
@@ -72,8 +76,10 @@ public class BedrockCracker implements ModInitializer {
 
         if (!settings.logProgress) return;
 
+        String timestamp = "§8[" + LocalTime.now().format(TIME_FORMAT) + "]§r ";
+
         Minecraft.getInstance().execute(() -> {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal(CHAT_PREFIX).append(message));
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal(CHAT_PREFIX + timestamp).append(message));
         });
     }
 
@@ -101,7 +107,7 @@ public class BedrockCracker implements ModInitializer {
             }
             return;
         }
-        sendChatMessage("§7Search finished in "+((System.currentTimeMillis() - startTime)/1000) + " seconds");
+        sendChatMessage("§7Structure seed search finished in "+((System.currentTimeMillis() - startTime)/1000) + " seconds");
 
 
         if (structureSeeds.isEmpty()) {
@@ -116,16 +122,19 @@ public class BedrockCracker implements ModInitializer {
                     "guessing the world seed might take a bit longer");
         }
 
-        sendChatMessage("§7Brute forcing world seed...");
+        sendChatMessage("§7Brute forcing world seed... §8(" + structureSeeds.size() + " structure seed(s) to check)");
 
         List<Long> worldSeeds = new ArrayList<>();
-        for (long l : structureSeeds) {
-            OverworldCracker.addOverworldSeedToList(l, worldSeeds);
+        for (int i = 0; i < structureSeeds.size(); i++) {
+            sendChatMessage("§7Brute forcing world seed §8(" + (i + 1) + "/" + structureSeeds.size() + ")...");
+            OverworldCracker.addOverworldSeedToList(structureSeeds.get(i), worldSeeds);
         }
+        sendChatMessage("§7World seed search finished in " + ((System.currentTimeMillis() - startTime)/1000) + " seconds");
 
         if (worldSeeds.isEmpty()) {
             sendChatMessage("§cSOMETHING WE WRONG :( no world seed was found");
         } else if (worldSeeds.size() == 1) {
+            sendChatMessage("§2World seed cracked in " + ((System.currentTimeMillis() - startTime)/1000) + " seconds!");
 
             for (BedrockCrackerController controller : controllers) {
                 controller.seedCrackedEvent(worldSeeds.get(0));

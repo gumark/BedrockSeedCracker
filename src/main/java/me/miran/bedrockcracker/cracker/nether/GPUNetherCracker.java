@@ -1,5 +1,6 @@
 package me.miran.bedrockcracker.cracker.nether;
 
+import me.miran.bedrockcracker.BedrockCracker;
 import me.miran.bedrockcracker.cracker.util.jocl.Buffer;
 import me.miran.bedrockcracker.cracker.util.jocl.IntBuffer;
 import me.miran.bedrockcracker.cracker.util.jocl.LongBuffer;
@@ -92,11 +93,19 @@ class GPUNetherCracker extends AbstractNetherCracker implements AutoCloseable {
 
         List<Long> output = new ArrayList<>();
         int loopLimit = 1 << 6;
+        long startTime = System.currentTimeMillis();
+
+        BedrockCracker.sendChatMessage("§7Using §dGPU §7cracker §8(" + loopLimit + " batches)");
 
         for (int i = 0; i < loopLimit; i++) {
             // FIXME 16384 is an arbitrary size
             output.addAll(calculateBatch(tests, i, 16384));
-            System.out.println(i + "/" + loopLimit);
+
+            long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+            long eta = (i + 1) > 0 ? (elapsed * (loopLimit - i - 1)) / (i + 1) : 0;
+
+            BedrockCracker.sendChatMessage("§7Batch §f" + (i + 1) + "/" + loopLimit + " §7done §8(" + output.size() + " candidate(s), "
+                    + elapsed + "s elapsed, ~" + eta + "s left)");
         }
 
         return output;

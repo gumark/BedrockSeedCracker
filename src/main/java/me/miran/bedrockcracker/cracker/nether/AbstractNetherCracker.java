@@ -1,5 +1,6 @@
 package me.miran.bedrockcracker.cracker.nether;
 
+import me.miran.bedrockcracker.BedrockCracker;
 import me.miran.bedrockcracker.util.BedrockCollector;
 import me.miran.bedrockcracker.cracker.util.BedrockType;
 import me.miran.bedrockcracker.cracker.util.CheckedRandom;
@@ -17,6 +18,8 @@ abstract class AbstractNetherCracker {
     public List<Long> crack() {
         List<Test> tests = loadTests();
 
+        BedrockCracker.sendChatMessage("§7Checking §f" + tests.size() + " §7bedrock samples...");
+
         List<Test> mainTests = new ArrayList<>(tests);
 
         mainTests.removeIf((test) -> test.y < 64);
@@ -27,6 +30,8 @@ abstract class AbstractNetherCracker {
 
 
         List<Long> results = getSeedCandidates(testArr);
+
+        BedrockCracker.sendChatMessage("§7Verifying §f" + results.size() + " §7candidate(s) against all bedrock samples...");
 
         List<Long> structureSeeds = new ArrayList<>();
 
@@ -44,6 +49,8 @@ abstract class AbstractNetherCracker {
 
             return false;
         });
+
+        BedrockCracker.sendChatMessage("§7Verification done: §f" + structureSeeds.size() + " §7structure seed(s) survived");
 
         return structureSeeds;
     }
