@@ -91,7 +91,7 @@ public class BedrockCracker implements ModInitializer {
         List<Long> structureSeeds;
         try {
             structureSeeds = NetherCracker.crack();
-        } catch (Error e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             sendChatMessage("§cEncountered an error whilst trying to crack the seed!");
 

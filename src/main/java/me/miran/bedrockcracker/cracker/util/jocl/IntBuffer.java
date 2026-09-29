@@ -7,6 +7,7 @@ import org.jocl.cl_context;
 
 import static org.jocl.CL.CL_TRUE;
 import static org.jocl.CL.clEnqueueReadBuffer;
+import static org.jocl.CL.clEnqueueWriteBuffer;
 
 /**
  * Specific {@link Buffer} implementation for ints.
@@ -32,6 +33,14 @@ public class IntBuffer extends Buffer {
                 (long) size * getTypeSize(), Pointer.to(memHolder), 0, null, null);
 
         return memHolder;
+    }
+
+    /**
+     * Writes the given data into the buffer. Needed because clCreateBuffer leaves contents undefined.
+     */
+    public void write(cl_command_queue queue, int[] data) {
+        clEnqueueWriteBuffer(queue, memPointer, CL_TRUE, 0,
+                (long) data.length * getTypeSize(), Pointer.to(data), 0, null, null);
     }
 
     @Override

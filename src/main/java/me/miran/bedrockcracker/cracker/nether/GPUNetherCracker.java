@@ -104,33 +104,48 @@ class GPUNetherCracker extends AbstractNetherCracker implements AutoCloseable {
 
 
     private static List<Long> calculateBatch(long[] testsValue, int lowBitsValue, int resultsArraySize) {
-        LongBuffer lowBits = new LongBuffer(context, new long[]{lowBitsValue});
-        LongBuffer tests = new LongBuffer(context, testsValue);
-        LongBuffer results = new LongBuffer(context, resultsArraySize);
-        IntBuffer resultIndex = new IntBuffer(context, 1);
+        int capacity = resultsArraySize;
 
+        while (true) {
+            LongBuffer lowBits = new LongBuffer(context, new long[]{lowBitsValue});
+            LongBuffer tests = new LongBuffer(context, testsValue);
+            LongBuffer results = new LongBuffer(context, capacity);
+            IntBuffer resultIndex = new IntBuffer(context, 1);
 
-        passArgs(lowBits, tests, results, resultIndex);
+            // clCreateBuffer leaves contents undefined -> the atomic counter MUST start at 0
+            resultIndex.write(queue, new int[]{0});
 
-        clEnqueueNDRangeKernel(queue, kernel, 1, null,
-                new long[]{1 << 30}, null, 0, null, null);
+            passArgs(lowBits, tests, results, resultIndex);
+            clSetKernelArg(kernel, 4, Sizeof.cl_int, Pointer.to(new int[]{capacity}));
 
-        int[] indexArr = resultIndex.read(queue);
-        clFinish(queue); // rather call `finish` to make sure the index is the correct one
+            clEnqueueNDRangeKernel(queue, kernel, 1, null,
+                    new long[]{1 << 30}, null, 0, null, null);
 
-        long[] output = results.read(queue, indexArr[0]);
-        clFinish(queue);
+            clFinish(queue); // rather call `finish` to make sure the index is the correct one
 
-        List<Long> resultsList = new ArrayList<>();
+            int[] indexArr = resultIndex.read(queue);
+            int count = indexArr[0];
 
-        for (int i = 0; i < output.length && i < indexArr[0]; i++) {
-            long result = output[i];
-            resultsList.add(result);
+            if (count > capacity) {
+                // the kernel keeps counting past the limit, so `count` is the exact amount needed
+                releaseBuffers(lowBits, tests, results, resultIndex);
+                capacity = count;
+                continue;
+            }
+
+            long[] output = results.read(queue, Math.max(count, 0));
+            clFinish(queue);
+
+            List<Long> resultsList = new ArrayList<>();
+
+            for (int i = 0; i < count; i++) {
+                resultsList.add(output[i]);
+            }
+
+            releaseBuffers(lowBits, tests, results, resultIndex);
+
+            return resultsList;
         }
-
-        releaseBuffers(lowBits, tests, results, resultIndex);
-
-        return resultsList;
     }
 
     private static void releaseBuffers(Buffer... buffers) {

@@ -1,7 +1,7 @@
 #define MULTIPLY 25214903917L
 #define MASK 281474976710655L
 
-__kernel void crack(__global const long* lowBitsPointer, __global const long* tests, __global long* resultsAll, __global int* resultsIndex) {
+__kernel void crack(__global const long* lowBitsPointer, __global const long* tests, __global long* resultsAll, __global int* resultsIndex, int resultsCapacity) {
     int id = get_global_id(0);
 
     const long lowBits = lowBitsPointer[0];
@@ -49,7 +49,12 @@ __kernel void crack(__global const long* lowBitsPointer, __global const long* te
         if ((((upperBits ^ (tests[19] & hashMask)) * MULTIPLY) & MASK) < compare) continue;
 
         if (unknownBits == 0) {
-            resultsAll[atomic_inc(resultsIndex)] = upperBits;
+            // the counter keeps going past the limit so the host can detect overflow,
+            // but never write outside the results buffer
+            int resultIdx = atomic_inc(resultsIndex);
+            if (resultIdx < resultsCapacity) {
+                resultsAll[resultIdx] = upperBits;
+            }
             continue;
         }
 
