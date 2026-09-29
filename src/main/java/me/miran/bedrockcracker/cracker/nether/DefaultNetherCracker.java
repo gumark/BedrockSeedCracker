@@ -8,9 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 
 class DefaultNetherCracker extends AbstractNetherCracker{
+
+    // each thread writes its progress to its own stride of this array so the
+    // hot loop never touches a shared cache line (a shared atomic counter here
+    // made the whole search several times slower)
+    private static final int PROGRESS_STRIDE = 8;
 
     @Override
     protected @NotNull List<Long> getSeedCandidates(Test[] testArr) {
@@ -23,13 +27,14 @@ class DefaultNetherCracker extends AbstractNetherCracker{
         long chunkSize = limit / threadCount;
 
         CountDownLatch latch = new CountDownLatch(threadCount);
-        AtomicLong progress = new AtomicLong();
+        long[] progress = new long[threadCount * PROGRESS_STRIDE];
 
         BedrockCracker.sendChatMessage("§7Using §dCPU §7cracker §8(" + threadCount + " threads, this can take a while)");
 
         long startTime = System.currentTimeMillis();
 
         for (int t = 0; t < threadCount; t++) {
+            int threadIndex = t;
             long start = t * chunkSize;
             long end;
 
@@ -40,10 +45,18 @@ class DefaultNetherCracker extends AbstractNetherCracker{
             }
 
             new Thread(() -> {
+                long done = 0;
+
                 for (long i = start; i < end; i++) {
                     runChecks(testArr, i << 12, 12, results);
-                    progress.incrementAndGet();
+                    done++;
+
+                    if ((done & 4095) == 0) {
+                        progress[threadIndex * PROGRESS_STRIDE] = done;
+                    }
                 }
+
+                progress[threadIndex * PROGRESS_STRIDE] = done;
                 latch.countDown();
             }).start();
 
@@ -52,7 +65,11 @@ class DefaultNetherCracker extends AbstractNetherCracker{
         // report progress every ~10 seconds until all threads are done
         try {
             while (!latch.await(10, TimeUnit.SECONDS)) {
-                long done = progress.get();
+                long done = 0;
+                for (int t = 0; t < threadCount; t++) {
+                    done += progress[t * PROGRESS_STRIDE];
+                }
+
                 long elapsed = (System.currentTimeMillis() - startTime) / 1000;
                 long eta = done > 0 ? (elapsed * (limit - done)) / done : -1;
 

@@ -127,8 +127,9 @@ class GPUNetherCracker extends AbstractNetherCracker implements AutoCloseable {
             passArgs(lowBits, tests, results, resultIndex);
             clSetKernelArg(kernel, 4, Sizeof.cl_int, Pointer.to(new int[]{capacity}));
 
+            // the kernel grid-strides over all ids itself, this only controls parallelism
             clEnqueueNDRangeKernel(queue, kernel, 1, null,
-                    new long[]{1 << 30}, null, 0, null, null);
+                    new long[]{1 << 20}, null, 0, null, null);
 
             clFinish(queue); // rather call `finish` to make sure the index is the correct one
 

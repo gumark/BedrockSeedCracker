@@ -22,7 +22,8 @@ public abstract class Buffer {
     }
 
     protected Buffer(cl_context context, Pointer inputPointer, int inputSize) {
-        this.memPointer = clCreateBuffer(context, CL_MEM_USE_HOST_PTR, (long) getTypeSize() * inputSize, inputPointer, null);
+        // READ_ONLY: buffers built from host input are only read by kernels (they may be passed as __constant)
+        this.memPointer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, (long) getTypeSize() * inputSize, inputPointer, null);
         this.size = inputSize;
     }
 
