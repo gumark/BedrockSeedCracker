@@ -5,10 +5,10 @@
   "name": "BedrockCracker",
   "description": "",
   "authors": [
-    "MiranCZ"
+    "gumark"
   ],
   "contact": {
-    "repo": "https://github.com/MiranCZ/BedrockSeedCracker"
+    "repo": "https://github.com/gumark/BedrockSeedCracker"
   },
   "license": "MIT",
   "icon": "assets/bedrockcracker/icon.png",
