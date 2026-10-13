@@ -15,7 +15,7 @@ A relatively small Fabric mod that finds the **seed of the world you are playing
 
 | | |
 |---|---|
-| Minecraft | **26.3** |
+| Minecraft | **26.3, 26.2 or 26.1.2** |
 | Fabric Loader | **0.19.5+** |
 | Fabric API | **0.161.0+26.3** |
 | Java | 25+ (for building; playing just needs a matching launcher) |
