@@ -7,6 +7,8 @@
 
 A relatively small Fabric mod that finds the **seed of the world you are playing in** by analyzing bedrock patterns — no operator permissions, no cheats, works even on vanilla servers. Just uses the bedrock block; **Java Edition only**.
 
+![alt text](https://github.com/gumark/BedrockSeedCracker/blob/master/javaw_U0PmTTwcBZ.png?raw=true)
+
 ---
 
 ## Requirements
