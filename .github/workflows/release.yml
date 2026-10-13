@@ -7,9 +7,22 @@ on:
 permissions:
   contents: write
 
+env:
+  MC_VERSIONS: "26.3, 26.2, 26.1.2"
+
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mc_version: "26.3"
+            fabric_version: "0.161.0+26.3"
+          - mc_version: "26.2"
+            fabric_version: "0.161.0+26.2"
+          - mc_version: "26.1.2"
+            fabric_version: "0.155.3+26.1.2"
 
     steps:
       - name: Checkout
@@ -25,15 +38,36 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build
-        run: ./gradlew build
+        run: ./gradlew build -Pminecraft_version=${{ matrix.mc_version }} -Pfabric_version=${{ matrix.fabric_version }}
+
+      - name: Rename jar per target version
+        run: |
+          jar=$(find build/libs -name '*.jar' ! -name '*-sources.jar')
+          mv "$jar" build/libs/BedrockCracker-mc${{ matrix.mc_version }}.jar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: BedrockCracker-mc${{ matrix.mc_version }}
+          path: build/libs/*.jar
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all built jars
+        uses: actions/download-artifact@v7
+        with:
+          merge-multiple: true
+          path: dist
 
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          jar=$(find build/libs -name '*.jar' ! -name '*-sources.jar')
-          mc_version=$(grep 'minecraft_version' gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+          ls -la dist
           gh release create "$GITHUB_REF_NAME" \
-            --title "BedrockCracker $GITHUB_REF_NAME for Minecraft $mc_version" \
+            --title "BedrockCracker $GITHUB_REF_NAME for Minecraft $MC_VERSIONS" \
             --generate-notes \
-            "$jar"
+            dist/*.jar
