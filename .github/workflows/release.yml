@@ -42,6 +42,7 @@ jobs:
 
       - name: Rename jar per target version
         run: |
+          find build/libs -name '*-sources.jar' -delete
           jar=$(find build/libs -name '*.jar' ! -name '*-sources.jar')
           mv "$jar" build/libs/BedrockCracker-mc${{ matrix.mc_version }}.jar
 
@@ -49,13 +50,16 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: BedrockCracker-mc${{ matrix.mc_version }}
-          path: build/libs/*.jar
+          path: build/libs/BedrockCracker-mc${{ matrix.mc_version }}.jar
 
   release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Download all built jars
         uses: actions/download-artifact@v7
         with:
@@ -70,4 +74,4 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             --title "BedrockCracker $GITHUB_REF_NAME for Minecraft $MC_VERSIONS" \
             --generate-notes \
-            dist/*.jar
+            dist/BedrockCracker-mc*.jar
